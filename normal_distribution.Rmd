@@ -1,0 +1,124 @@
+---
+title: "Normal Distribution"
+author: "Saurabh Mishra"
+date: "`r format(Sys.Date())`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+
+The normal distribution, is also known as the bell curve and as the Gaussian distribution
+
+We often see the average and the standard deviation used as a summary statistic for a list of numbers, a two number summary.
+
+To understand what these summaries are and why they are so widely used, we need to understand the normal distribution.
+
+(Approximately) Normal distributions occur in many situations like gambling winnings, heights, weights, blood pressure, standardized test scores, and experimental measurement error.
+
+This distribution is *completely* defined by just two parameters: mean (or average) and standard deviation
+The distribution is symmetric, and centered at the average. About 68% of the values are within 1 standard deviation from the mean, about 95% of values, are within 2 standard deviations from the mean, and 99.7% of the values are within 3 standard deviations of the mean
+
+```{r}
+# Create a sample of 10 numbers which is normally distributed
+# (x = rnorm(10))
+(x <- seq(-10, 10, by = 2))
+
+(average <- sum(x) / length(x))
+# average <- mean(x)
+(std_dev <- sqrt( sum( (x - average)^2) / length(x)))
+# std_dev <- sd(x)
+c(average = average, sd = std_dev)
+```
+
+For data that is approximately normal, it is convenient to think in terms of standard units. The standard unit of value tells us how many standard deviations away from the average a value is, which is very useful.
+
+If we want to know whether a person is about average height, that would mean z equals 0. A person that is tall would be z equals 2. A person that is short would be z equals negative 2. And extremely rare occurrences, say a 7 footer or something like that, would have a z bigger than 3. Or someone very short would have a z smaller negative 3.
+
+```{r}
+(std_unit <- (x - average) / std_dev)
+# std_unit <- scale(x)
+```
+
+If we can assume that the data is approximately normal, we can predict the proportion of data in an interval without actually looking at the data.
+
+```{r}
+#Proportion of data within 2 standard devaitions of the mean:
+mean(abs(std_unit) < 2) 
+```
+
+
+### Assessment 
+
+```{r}
+library(dslabs)
+data(heights)
+x <- heights$height[heights$sex=="Male"]
+```
+
+
+1. What proportion of male heights is between 69 and 72 inches (taller than 69 but shorter or equal to 72)?
+```{r}
+mean(x > 69 & x <= 72)
+```
+
+
+2. Use the `pnorm` function to answer the above question
+```{r}
+avg <- mean(x)
+stdev <- sd(x)
+pnorm(72, mean=avg, sd=stdev) - pnorm(69, mean=avg, sd=stdev)
+# The approximation calculated above is very close to the exact calculation in the first case. Although the normal distribution was a useful approximation for this case. It will not always be useful when there are more extreme values (or tails) in the distribution.
+```
+
+
+3. Use normal approximation to estimate the proportion of heights between 79 and 81 inches and report how many times bigger the actual proportion is compared to the approximation.
+
+```{r}
+(exact <- mean(x > 79 & x <= 81))
+(approx <- pnorm(81, mean=mean(x), sd=sd(x)) - pnorm(79, mean=mean(x), sd=sd(x)))
+(exact/approx)
+```
+
+
+4. Estimate the proportion of adult men that are 7 feet tall or taller. Assume that the distribution is normally distributed with an average of 69 inches and a standard deviation of 3 inches.
+
+```{r}
+pnorm(7*12, mean = 69, sd = 3, lower.tail = FALSE)
+# 1 - pnorm(7*12, mean = 69, sd = 3)
+
+# The pnorm function, by default, returns the area under the curve to the left of the value passed in as the first argument. You can get the area under the curve to the right of this value by:
+    # calculating 1 - pnorm, or 
+    # by passing in the argument "lower.tail = FALSE". 
+```
+
+
+5. There are about 1 billion men between the ages of 18 and 40 in the world. Use the normal distribution to estimate how many of these 1 billion men are at least seven feet tall
+
+```{r}
+p <- (1 - pnorm(7*12, mean = 69, sd = 3)) * 10^9
+round(p)
+```
+
+
+6. Calculate the proportion of the world's 18 to 40 year old seven footers that are in the NBA. There are about 10 National Basketball Association (NBA) players that are 7 feet tall or higher.
+
+```{r}
+(N <- round(p))
+(10 / N)
+```
+
+
+7. Repeat the calculations performed in the previous question for Lebron James' height: 6 feet 8 inches. There are about 150 players, instead of 10, that are at least that tall in the NBA.
+
+```{r}
+p <- 1 - pnorm(80, 69, 3)
+N <- round(p * 10^9)
+150/N
+```
+
+
+In answering the previous questions, we found that it is not at all rare for a seven footer to become an NBA player.
+
+A fair critique of our calculations would be that the normal approximation tends to underestimate the extreme values. It's possible that there are more seven footers than we predicted (Assessment #3).
