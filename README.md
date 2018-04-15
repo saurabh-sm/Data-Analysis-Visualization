@@ -1,6 +1,7 @@
 # Data-Analysis-Visualization
 Second course of the "Data Science Professional Certificate" program.
 
+
 1. Introduction to Data Visualization and Distributions
 
     1.1 Introduction to Data Visualization
